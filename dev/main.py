@@ -60,8 +60,8 @@ def collect_rw(url: str) -> list:
         temp['name'] = row.find('h3', class_='z-sort-name').text
 
         for rune in row.find_all('span', class_='ajax_catch'):
-            temp_runes.append(rune.find('div').get('data-background-image').split('rune')[-1].split('_')[0])
-        
+            temp_runes.append(rune.find('span', class_='z-recipes').text)
+
         temp['runes'] = ', '.join(temp_runes)
         temp['lvl'] = int(row.find('span', class_='zso_rwlvlrq').text)
         temp['sockets'] = int(row.find('span', class_='zso_rwsock').text)
@@ -78,7 +78,7 @@ def collect_rw(url: str) -> list:
                 cleaned_text = re.sub(r'[\n\r\t]', '', description.text.strip())
                 temp['description'] = cleaned_text
                 print(cleaned_text)
-            # return
+
         temp['item_class'] = ', '.join(temp_item_class)
 
         if row.find('span', class_='zi zi-bb zi-ladder z-ic'):
@@ -112,29 +112,29 @@ def collect_r(path: str) -> list:
 
 def main():
     runewords = collect_rw(url=URL)
-    # runes = collect_r(path=PATH)
-    # engine = sqlalchemy.create_engine(r'sqlite:///..\sqlite.db', echo=True)
-    # Base.metadata.create_all(bind=engine)
+    runes = collect_r(path=PATH)
+    engine = sqlalchemy.create_engine(r'sqlite:///..\sqlite.db', echo=True)
+    Base.metadata.create_all(bind=engine)
     
-    # for runeword in runewords:
-    #     with Session(autoflush=False, bind=engine) as db:
-    #         rw = RuneWords(
-    #             name=runeword['name'],
-    #             item_class=runeword['item_class'],
-    #             ladder = runeword['ladder'],
-    #             sockets = runeword['sockets'],
-    #             lvl = runeword['lvl'],
-    #             runes = runeword['runes'],
-    #             description = runeword['description']
-    #             )
-    #         db.add(rw)
-    #         db.commit()
+    for runeword in runewords:
+        with Session(autoflush=False, bind=engine) as db:
+            rw = RuneWords(
+                name=runeword['name'],
+                item_class=runeword['item_class'],
+                ladder = runeword['ladder'],
+                sockets = runeword['sockets'],
+                lvl = runeword['lvl'],
+                runes = runeword['runes'],
+                description = runeword['description']
+                )
+            db.add(rw)
+            db.commit()
 
-    # for rune in runes:
-    #     with Session(autoflush=False, bind=engine) as db:
-    #         r = Runes(name=rune['name'], image=rune['image'])
-    #         db.add(r)
-    #         db.commit()
+    for rune in runes:
+        with Session(autoflush=False, bind=engine) as db:
+            r = Runes(name=rune['name'], image=rune['image'])
+            db.add(r)
+            db.commit()
     
 
 if __name__ == '__main__':
